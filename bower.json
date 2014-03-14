@@ -1,0 +1,28 @@
+{
+  "name": "Swami",
+  "version": "0.1.0",
+  "authors": [
+    "J. Bruni <contato@jbruni.com.br>"
+  ],
+  "description": "Smart Web Access Methods Interface for AngularJS",
+  "main": "./dist/swami.js",
+  "keywords": [
+    "AngularJS",
+    "HTTP",
+    "REST",
+    "resource"
+  ],
+  "license": "MIT",
+  "homepage": "http://github.com/jbruni/swami",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": ">=1.8",
+    "angular": ">=1.0.8"
+  }
+}

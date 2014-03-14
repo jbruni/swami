@@ -1,0 +1,1 @@
+define(["jquery","angular"],function(t,n){var r=["$http",function(n){return function(r){var e={};return e.all=function(){var e=n.get(r);return e.result={},e.then(function(n){t.extend(e.result,n.data)}),e.result},e}}];return n.module("Swami",[]).factory("Swami",r)});
