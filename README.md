@@ -1,8 +1,8 @@
 # Swami
 
-Smart Web Access Methods Interface is my thin and light toolset to make Ajax requests
-from a client-side front-end AngularJS app running in the browser to communicate with
-the server-side back-end.
+Smart Wired Ajax Models Interface for AngularJS is my thin and light toolset to make
+Ajax requests from a client-side front-end AngularJS app running in the browser
+to communicate with the server-side back-end.
 
 I have used angular-resource (`$resource`), and then I have tried
 [Restangular](https://github.com/mgonto/restangular) and 

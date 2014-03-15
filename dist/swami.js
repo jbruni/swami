@@ -1,1 +1,4 @@
-define(["jquery","angular"],function(r,t){var n=["$http",function(t){return function(n){var u={},e={};return u.all=function(){var u=t.get(n);return u.result={},u.then(function(t){r.extend(u.result,t.data),e=u.result}),u.result},u.first=function(r){r=r||e;for(var t in r)return t},u}}];return t.module("Swami",[]).factory("Swami",n)});
+define(["jquery","angular","es5-shim"],function(n,t){var r=["$http",function(r){return function(e){var a={},u={},o={},f={};return a.all=function(){if(!n.isEmptyObject(o))return o;var t=r.get(e);return t.result={},t.then(function(r){a.transformResponse(r,"all"),n.extend(t.result,r.data),o=t.result}),t.result},a.first=function(n){n=n||o;for(var t in n)return t},a.model=Object,a.create=function(t,r){var e=new a.model;return n.extend(e,t),r&&(f[r]=e),e},a.find=function(n){return o[n]?o[n]:f[n]?f[n]:null},a.transformResponse=function(r){var e=Object.keys(u);t.forEach(r.data,function(r){t.forEach(r,function(r,a){-1!=n.inArray(a,e)&&t.forEach(r,function(n,t){r[t]=u[a][1].create(r[t],t)})})})},a.hasMany=function(n,t){u[n]=["hasMany",t]},a}}];return t.module("Swami",[]).factory("Swami",r)});
+/*
+//@ sourceMappingURL=swami.js.map
+*/

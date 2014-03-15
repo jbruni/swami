@@ -1,15 +1,17 @@
 {
   "name": "Swami",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "authors": [
     "J. Bruni <contato@jbruni.com.br>"
   ],
-  "description": "Smart Web Access Methods Interface for AngularJS",
+  "description": "Smart Wired Ajax Models Interface for AngularJS",
   "main": "./dist/swami.js",
   "keywords": [
     "AngularJS",
+    "models",
     "HTTP",
     "REST",
+    "Ajax",
     "resource"
   ],
   "license": "MIT",
@@ -23,6 +25,7 @@
   ],
   "dependencies": {
     "jquery": ">=1.8",
-    "angular": ">=1.0.8"
+    "angular": ">=1.0.8",
+    "es5-shim": ">=2.0.0"
   }
 }
