@@ -23,10 +23,16 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
 
             Swami.http = function(method, data, init, url) {
 
-                data = data || {};
-                url  = url  || mainUrl;
+                var sendData = ($.inArray(method, ['post', 'put']) != -1);
 
-                $.extend(data, Swami.dataDefaults.apply(Swami, arguments));
+                if (sendData) {
+                    data = data || {};
+                    $.extend(data, Swami.dataDefaults.apply(Swami, arguments));
+                }
+
+                url = url  || mainUrl;
+
+                config = Swami.configDefaults.apply(Swami, arguments);
 
                 if (Swami.before != angular.noop) {
                     Swami.before.apply(Swami, arguments);
@@ -36,7 +42,7 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                     Builder.before.apply(Swami, arguments);
                 }
 
-                var http = $http[method](url, data);
+                var http = sendData ? $http[method](url, data, config) : $http[method](url, config);
 
                 http.result = init || {};
 
@@ -125,6 +131,12 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
             Swami.dataDefaults = function() {
                 return {
                     '_token': $('input[name=_token]').val()
+                };
+            };
+
+            Swami.configDefaults = function() {
+                return {
+                    'headers': { 'X-Requested-With': 'XMLHttpRequest' }
                 };
             };
 
