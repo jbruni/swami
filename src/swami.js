@@ -6,28 +6,70 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
 
     var SwamiFactory= ['$http', function($http) {
 
-        return function(url) {
+        function Builder(mainUrl) {
 
-            var Swami = {},
-                rel   = {},
-                all   = {},
-                some  = {};
+            var rel   = {},   // relationships
+                all   = {},   // all data records
+                some  = {},   // some data records
+                req   = {};   // $http promises
 
-            Swami.all = function() {
+            var Swami = {
+                'model':   Object,
+                'before':  angular.noop,
+                'success': angular.noop,
+                'error':   angular.noop,
+                'finally': angular.noop
+            };
 
-                if (!$.isEmptyObject(all)) return all;
+            Swami.http = function(method, data, init, url) {
 
-                var http = $http.get(url);
-                http.result = {};
-                http.then(function(response) {
+                data = data || {};
+                url  = url  || mainUrl;
 
-                    Swami.transformResponse(response, 'all');
+                $.extend(data, Swami.dataDefaults.apply(Swami, arguments));
 
-                    $.extend(http.result, response.data);
+                if (Swami.before != angular.noop) {
+                    Swami.before.apply(Swami, arguments);
+                }
 
-                    all = http.result;
+                if (Builder.before != angular.noop) {
+                    Builder.before.apply(Swami, arguments);
+                }
+
+                var http = $http[method](url, data);
+
+                http.result = init || {};
+
+                angular.forEach(['success', 'error', 'finally'], function(event) {
+                    if (Swami[event] != angular.noop) {
+                        http[event](Swami[event]);
+                    }
+                    if (Builder[event] != angular.noop) {
+                        http[event](Builder[event]);
+                    }
                 });
-                return http.result;
+
+                return http;
+            };
+
+            Swami.all = function(force) {
+
+                if (!$.isEmptyObject(all) && !force) return all;
+
+                if (req.all && !force) return req.all.result;
+
+                req.all = Swami.http('get', {}, all);
+
+                req.all.success(function(data) {
+
+                    Swami.transformData(data, 'all');
+
+                    $.extend(req.all.result, data);
+
+                    all = req.all.result;
+                });
+
+                return req.all.result;
             };
 
             Swami.first = function(thing) {
@@ -38,8 +80,6 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                     return key;
                 }
             };
-
-            Swami.model = Object;
 
             Swami.create = function(attributes, id) {
                 var object = new Swami.model();
@@ -56,11 +96,11 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                 return null;
             };
 
-            Swami.transformResponse = function(response, source) {
+            Swami.transformData = function(data, source) {
 
                 var rels = Object.keys(rel);
 
-                angular.forEach(response.data, function(item) {
+                angular.forEach(data, function(item) {
                     angular.forEach(item, function(field, key) {
                         if ($.inArray(key, rels) != -1) {
                             // hasMany
@@ -78,9 +118,25 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                 rel[attribute] = ['hasMany', model];
             };
 
-            return Swami;
-        };
+            Swami.save = function(object, url) {
+                return Swami.http('post', object, {}, url);
+            };
 
+            Swami.dataDefaults = function() {
+                return {
+                    '_token': $('input[name=_token]').val()
+                };
+            };
+
+            return Swami;
+        }
+
+        Builder.before     = function() { $('body').addClass('wait'); };
+        Builder.success    = angular.noop;
+        Builder.error      = angular.noop;
+        Builder['finally'] = function() { $('body').removeClass('wait'); };
+
+        return Builder;
     }];
 
     return angular.module('Swami', [])
