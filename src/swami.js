@@ -11,7 +11,7 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
             var rel   = {},   // relationships
                 all   = {},   // all data records
                 some  = {},   // some data records
-                req   = {};   // $http promises
+                req   = { loadFrom: {} };   // $http promises
 
             var Swami = {
                 'model':   Object,
@@ -102,6 +102,31 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                 return null;
             };
 
+            Swami.loadFrom = function(url, data, force) {
+                var jsonArgs = angular.toJson([url, data]);
+
+                if (req.loadFrom[jsonArgs] && !force) return req.loadFrom[jsonArgs].result;
+
+                var r = req.loadFrom[jsonArgs] = Swami.http('get', data, Swami.create(), url);
+
+                r.success(function(data) {
+
+                    var rels = Object.keys(rel);
+
+                    angular.forEach(data, function(field, key) {
+                        if ($.inArray(key, rels) == -1) {
+                            r.result[key] = field;
+                        } else {
+                            // hasOne
+                            r.result[key] = rel[key][1].create(field);
+                        }
+                    });
+
+                });
+
+                return r.result;
+            };
+
             Swami.transformData = function(data, source) {
 
                 var rels = Object.keys(rel);
@@ -122,6 +147,11 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
             Swami.hasMany = function(attribute, model) {
 
                 rel[attribute] = ['hasMany', model];
+            };
+
+            Swami.hasOne = function(attribute, model) {
+
+                rel[attribute] = ['hasOne', model];
             };
 
             Swami.save = function(object, url) {
