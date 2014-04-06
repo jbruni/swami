@@ -183,6 +183,8 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                 };
             };
 
+            Swami.some = some;
+
             return Swami;
         }
 
