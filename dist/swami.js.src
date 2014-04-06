@@ -14,6 +14,7 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                 req   = { loadFrom: {} };   // $http promises
 
             var Swami = {
+                'pk':      'id',
                 'model':   Object,
                 'before':  angular.noop,
                 'success': angular.noop,
@@ -113,15 +114,25 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
 
                     var rels = Object.keys(rel);
 
+                    // TODO: rewrite this as code seems confusing
                     angular.forEach(data, function(field, key) {
                         if ($.inArray(key, rels) == -1) {
                             r.result[key] = field;
-                        } else {
+                        } else if (rel[key][0] == 'hasOne') {
                             // hasOne
-                            r.result[key] = rel[key][1].create(field);
+                            r.result[key] = rel[key][1].create(field, field[rel[key][1].pk]);
+                        } else if (rel[key][0] == 'hasMany') {
+                            // hasMany
+                            angular.forEach(field, function(element, id) {
+                                field[id] = rel[key][1].create(field[id], id);
+                            });
+                            r.result[key] = field;
                         }
                     });
 
+                    if (r.result[Swami.pk]) {
+                        some[r.result[Swami.pk]] = r.result;
+                    }
                 });
 
                 return r.result;
@@ -131,12 +142,14 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
 
                 var rels = Object.keys(rel);
 
+                // TODO: rewrite this as code seems confusing - integrate with previous transform code
                 angular.forEach(data, function(item) {
                     angular.forEach(item, function(field, key) {
                         if ($.inArray(key, rels) != -1) {
                             // hasMany
                             angular.forEach(field, function(element, id) {
                                 field[id] = rel[key][1].create(field[id], id);
+                                rel[key][1].some[id] = field[id];
                             });
                         }
                     });
