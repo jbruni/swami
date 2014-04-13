@@ -11,6 +11,8 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
             var rel   = {},   // relationships
                 all   = {},   // all data records
                 some  = {},   // some data records
+                where = [],   // search results
+                conditions = [],  // search queries
                 req   = { loadFrom: {} };   // $http promises
 
             var Swami = {
@@ -79,6 +81,33 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                 return req.all.result;
             };
 
+            Swami.where = function(query, force) {
+
+                var jsonQuery = angular.toJson(query),
+                    index = $.inArray(jsonQuery, conditions),
+                    init = {};
+                
+                if ((index != -1) && !force) {
+                    return where[index].result;
+                }
+
+                if (index != -1) {
+                    init = where[index].result;
+                }
+
+                req = Swami.http('post', query, init);
+
+                req.success(function(data) {
+                    Swami.transformData(data, 'where');
+                    $.extend(req.result, data);
+                });
+
+                conditions.push(jsonQuery);
+                where.push(req);
+
+                return req.result;
+            };
+
             Swami.first = function(thing) {
 
                 thing = thing || all;
@@ -143,7 +172,8 @@ define(['jquery', 'angular', 'es5-shim'], function($, angular) {
                 var rels = Object.keys(rel);
 
                 // TODO: rewrite this as code seems confusing - integrate with previous transform code
-                angular.forEach(data, function(item) {
+                angular.forEach(data, function(item, pk) {
+                    data[pk] = Swami.create(item, item[Swami.pk]);
                     angular.forEach(item, function(field, key) {
                         if ($.inArray(key, rels) != -1) {
                             // hasMany
